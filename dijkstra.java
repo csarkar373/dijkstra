@@ -1,177 +1,182 @@
-// Java Program to Implement Dijkstra's Algorithm
-// Using Priority Queue taken from Geeks for Geeks
- 
-// Importing utility classes
 import java.util.*;
- 
-// Main class DPQ
-public class GFG {
- 
-    // Member variables of this class
-    private int dist[];
-    private Set<Integer> settled;
-    private PriorityQueue<Node> pq;
-    // Number of vertices
-    private int V;
-    List<List<Node> > adj;
- 
-    // Constructor of this class
-    public GFG(int V)
-    {
- 
-        // This keyword refers to current object itself
-        this.V = V;
-        dist = new int[V];
-        settled = new HashSet<Integer>();
-        pq = new PriorityQueue<Node>(V, new Node());
+
+public class Graph {
+    private int [] [] matrix;
+    private int nodeCount;
+    boolean [] visited;
+
+    public Graph(int [] [] matrix) {
+        this.matrix = matrix;
+        this.nodeCount = matrix.length;
+        this.visited = new boolean[this.nodeCount];
     }
- 
-    // Method 1
-    // Dijkstra's Algorithm
-    public void dijkstra(List<List<Node> > adj, int src)
-    {
-        this.adj = adj;
- 
-        for (int i = 0; i < V; i++)
-            dist[i] = Integer.MAX_VALUE;
- 
-        // Add source node to the priority queue
-        pq.add(new Node(src, 0));
- 
-        // Distance to the source is 0
-        dist[src] = 0;
- 
-        while (settled.size() != V) {
- 
-            // Terminating condition check when
-            // the priority queue is empty, return
-            if (pq.isEmpty())
-                return;
- 
-            // Removing the minimum distance node
-            // from the priority queue
-            int u = pq.remove().node;
- 
-            // Adding the node whose distance is
-            // finalized
-            if (settled.contains(u))
- 
-                // Continue keyword skips execution for
-                // following check
-                continue;
- 
-            // We don't have to call e_Neighbors(u)
-            // if u is already present in the settled set.
-            settled.add(u);
- 
-            e_Neighbours(u);
-        }
+
+    public boolean isVisited(int node) {
+        return visited[node];
     }
- 
-    // Method 2
-    // To process all the neighbours
-    // of the passed node
-    private void e_Neighbours(int u)
-    {
- 
-        int edgeDistance = -1;
-        int newDistance = -1;
- 
-        // All the neighbors of v
-        for (int i = 0; i < adj.get(u).size(); i++) {
-            Node v = adj.get(u).get(i);
- 
-            // If current node hasn't already been processed
-            if (!settled.contains(v.node)) {
-                edgeDistance = v.cost;
-                newDistance = dist[u] + edgeDistance;
- 
-                // If new distance is cheaper in cost
-                if (newDistance < dist[v.node])
-                    dist[v.node] = newDistance;
- 
-                // Add the current node to the queue
-                pq.add(new Node(v.node, dist[v.node]));
+
+    public void wasVisited(int node) {
+        visited[node] = true;
+    }
+
+    public boolean allVisited() {
+        for (int i = 0; i < visited.length; i++) {
+            if (!visited[i]) {
+                return false;
             }
         }
+        return true;
     }
- 
-    // Main driver method
-    public static void main(String arg[])
-    {
- 
-        int V = 5;
-        int source = 0;
- 
-        // Adjacency list representation of the
-        // connected edges by declaring List class object
-        // Declaring object of type List<Node>
-        List<List<Node> > adj
-            = new ArrayList<List<Node> >();
- 
-        // Initialize list for every node
-        for (int i = 0; i < V; i++) {
-            List<Node> item = new ArrayList<Node>();
-            adj.add(item);
+    public List<Integer> getNeighbors(int node) {
+        String answer = "";
+        List<Integer> answerList = new ArrayList<>();
+        for (int i = 0; i < nodeCount; i++) {
+            System.out.println("matrix[node][i] = " + matrix[node][i]);
+            if (matrix[node][i] != -1 && matrix[node][i] != Integer.MAX_VALUE) {
+                answer += i;
+                answerList.add(i);
+            }
         }
- 
-        // Inputs for the GFG(dpq) graph
-        adj.get(0).add(new Node(1, 9));
-        adj.get(0).add(new Node(2, 6));
-        adj.get(0).add(new Node(3, 5));
-        adj.get(0).add(new Node(4, 3));
- 
-        adj.get(2).add(new Node(1, 2));
-        adj.get(2).add(new Node(3, 4));
- 
-        // Calculating the single source shortest path
-        GFG dpq = new GFG(V);
-        dpq.dijkstra(adj, source);
- 
-        // Printing the shortest path to all the nodes
-        // from the source node
-        System.out.println("The shorted path from node :");
- 
-        for (int i = 0; i < dpq.dist.length; i++)
-            System.out.println(source + " to " + i + " is "
-                               + dpq.dist[i]);
+        System.out.println("neighbors: " + answer);
+        return answerList;
+    }
+
+    public List<Integer> getUnvisitedNeighbors(int node) {
+        List<Integer> unvisitedList = getNeighbors(node);
+        for (int i = 0; i < unvisitedList.size(); i++) {
+            if (isVisited(unvisitedList.get(i))) {
+                unvisitedList.remove(i);
+                i--;
+            }
+        }
+        System.out.println("unvisited neighbors: " + unvisitedList);
+        return unvisitedList;
+    }
+
+    public int getLowestUnvisitedNeighbor(int node) {
+        List<Integer> unvisited = getUnvisitedNeighbors(node);
+        if (unvisited.size() == 0)
+            return -1; // all neighbors have been visited
+        else {
+            int lowestIndex = 0;
+            int lowestWeight = matrix[node][unvisited.get(0)];
+            for (int i = 1; i < unvisited.size(); i++) {
+                if (matrix[node][unvisited.get(i)] < lowestWeight) {
+                    lowestWeight = matrix[node][unvisited.get(i)];
+                    lowestIndex = i;
+                }
+            }
+            System.out.println("lowest unvisited neighbor: " + unvisited.get(lowestIndex));
+            return unvisited.get(lowestIndex);
+        }
+    }
+
+    public boolean hasEdge(int from, int to) {
+        // -1 and MAX_VALUE are the two representations of infinity that we use
+        return matrix[from][to] != -1 && matrix[from][to] != Integer.MAX_VALUE;
+    }
+
+    public void printArray(int [] array) {
+        for (int i = 0; i < array.length; i++) {
+            System.out.print(array[i] + " ");
+        }
+        System.out.println();
+    }
+
+    public void dijkstra(int startingNode) {
+        int[] distances = new int[nodeCount];
+        int[] nearest = new int[nodeCount];
+        for (int i = 0; i < nodeCount; i++) {
+            distances[i] = Integer.MAX_VALUE; // infinite
+            nearest[i] = 0;
+        }
+
+        // set distance to start vertex to zero
+        distances[startingNode] = 0;
+        wasVisited(startingNode);
+
+        // while there remain some unvisited nodes
+        while (!allVisited()) {
+            int current = getLowestUnvisitedNeighbor(startingNode);
+            for (int neighbor : getUnvisitedNeighbors(current)) {
+                int newDistance = distances[current] + matrix[current][neighbor];
+                if(newDistance < distances[neighbor]) {
+                    distances[current] = newDistance;
+                    nearest[neighbor] = current;
+                }
+            }
+            wasVisited(current);
+            printVisited();
+            System.out.println("distances:");
+            printArray(distances);
+        }
+        // print the answers
+        System.out.println("distances:");
+        printArray(distances);
+        System.out.println("nearest verticies:");
+        printArray(nearest);
+    }
+
+    private void printVisited() {
+        System.out.print("visited = ");
+        for (int i = 0; i < visited.length; i++) {
+            System.out.print(visited[i] + " ");
+        }
+        System.out.println();
+    }
+
+    private static void printMatrix(int[][] matrix) {
+        for (int r = 0; r < matrix.length; r++) {
+            for (int c = 0; c < matrix[0].length; c++) {
+                String item = matrix[r][c] + "";
+                if (matrix[r][c] == -1)
+                    item = "-";
+                System.out.printf("%2s ", item);
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        String line = scan.nextLine();
+        int graphCount = Integer.parseInt(line);
+        System.out.println("graph count = " + graphCount);
+        line = scan.nextLine();
+        System.out.println("line = " + line);
+        String [] tokens = line.split(" ");
+        int nodes = Integer.parseInt(tokens[0]);
+        int edges = Integer.parseInt(tokens[1]);
+        System.out.println("nodes = " + nodes);
+        System.out.println("edges = " + edges);
+        int[][] matrix = new int[nodes][nodes];
+        for (int i = 0; i <nodes; i++) {
+            for (int j = 0; j < nodes; j++) {
+                matrix[i][j] = -1;
+            }
+        }
+        for (int j = 0; j < edges; j++) {
+            line = scan.nextLine();
+            tokens = line.split(" ");
+            int from = Integer.parseInt(tokens[0]);
+            int to = Integer.parseInt(tokens[1]);
+            if (tokens.length == 3) { // weighted graph
+                matrix[from][to] = Integer.parseInt(tokens[2]);
+                matrix[to][from] = Integer.parseInt(tokens[2]);
+            } else { // unweighted graph; use default weight of 1
+                matrix[from][to] = 1;
+                matrix[to][from] = 1;
+            }
+        }
+        printMatrix(matrix);
+        Graph graph = new Graph(matrix);
+        graph.dijkstra(0);
+
+        /*
+        for (int j = 0; j < graph.matrix.length; j++) {
+            graph.dfs(j);
+        }
+
+         */
     }
 }
- 
-// Class 2
-// Helper class implementing Comparator interface
-// Representing a node in the graph
-class Node implements Comparator<Node> {
- 
-    // Member variables of this class
-    public int node;
-    public int cost;
- 
-    // Constructors of this class
- 
-    // Constructor 1
-    public Node() {}
- 
-    // Constructor 2
-    public Node(int node, int cost)
-    {
- 
-        // This keyword refers to current instance itself
-        this.node = node;
-        this.cost = cost;
-    }
- 
-    // Method 1
-    @Override public int compare(Node node1, Node node2)
-    {
- 
-        if (node1.cost < node2.cost)
-            return -1;
- 
-        if (node1.cost > node2.cost)
-            return 1;
- 
-        return 0;
-    }
-}
- 
