@@ -3,25 +3,28 @@ import java.util.*;
 public class Graph {
     private int[][] matrix;
     private int nodeCount;
-    boolean[] visited;
+    List<Boolean> visited;
 
     public Graph(int[][] matrix) {
         this.matrix = matrix;
         this.nodeCount = matrix.length;
-        this.visited = new boolean[this.nodeCount];
+        this.visited = new ArrayList<Boolean>();
+        for (int i = 0; i < nodeCount; i++) {
+            visited.add(false);
+        }
     }
 
     public boolean isVisited(int node) {
-        return visited[node];
+        return visited.get(node);
     }
 
     public void wasVisited(int node) {
-        visited[node] = true;
+        visited.set(node, true);
     }
 
     public boolean allVisited() {
-        for (int i = 0; i < visited.length; i++) {
-            if (!visited[i]) {
+        for (int i = 0; i < visited.size(); i++) {
+            if (!visited.get(i)) {
                 return false;
             }
         }
@@ -33,7 +36,7 @@ public class Graph {
         String answer = "";
         List<Integer> answerList = new ArrayList<>();
         for (int i = 0; i < nodeCount; i++) {
-            System.out.println("matrix[node][i] = " + matrix[node][i]);
+            //System.out.println("matrix[node][i] = " + matrix[node][i]);
             if (matrix[node][i] != -1 && matrix[node][i] != Integer.MAX_VALUE) {
                 answer += i;
                 answerList.add(i);
@@ -78,63 +81,44 @@ public class Graph {
         return from != to && matrix[from][to] != -1 && matrix[from][to] != Integer.MAX_VALUE;
     }
 
-    public void printArray(int[] array) {
-        for (int i = 0; i < array.length; i++) {
-            System.out.print(array[i] + " ");
-        }
-        System.out.println();
-    }
 
     public void dijkstra(int startingNode) {
-        int[] distances = new int[nodeCount];
-        int[] nearest = new int[nodeCount];
+        List<Integer> distances = new ArrayList<>();
+        List<Integer> nearest = new ArrayList<>();
+
         for (int i = 0; i < nodeCount; i++) {
-            distances[i] = Integer.MAX_VALUE; // infinite
-            nearest[i] = 0;
+            distances.add(Integer.MAX_VALUE); // infinite
+            nearest.add(0);
         }
 
         // set distance to start vertex to zero
-        distances[startingNode] = 0;
+        distances.set(startingNode,0);
         wasVisited(startingNode);
-        System.out.println("distances ");
-        printArray(distances);
+        System.out.println("distances: " + distances);
 
         // while there remain some unvisited nodes
         int current = startingNode;
         while (!allVisited()) {
             for (int neighbor : getUnvisitedNeighbors(current)) {
-                if (hasEdge(current, neighbor)) {
-                    int newDistance = distances[current] + matrix[current][neighbor];
-                    System.out.println("current = " + current +
-                            " neighbor = " + neighbor);
+                    int newDistance = distances.get(current) + matrix[current][neighbor];
+                    System.out.println("current = " + current + " neighbor = " + neighbor);
                     System.out.println("new distance = " + newDistance +
-                            " old distance = " + distances[neighbor]);
-                    if (newDistance < distances[neighbor]) {
-                        distances[neighbor] = newDistance;
-                        nearest[neighbor] = current;
+                            " old distance = " + distances.get(neighbor));
+                    if (newDistance < distances.get(neighbor)) {
+                        distances.set(neighbor, newDistance);
+                        nearest.set(neighbor, current);
                     }
-                }
             }
             wasVisited(current);
-            printVisited();
-            System.out.println("distances:");
-            printArray(distances);
+            System.out.println("visited: " + visited);
+            System.out.println("distances: " + distances);
             current = getLowestUnvisitedNeighbor(current);
         }
         // print the answers
-        System.out.println("distances:");
-        printArray(distances);
-        System.out.println("nearest verticies:");
-        printArray(nearest);
+        System.out.println("distances: " + distances);
+        System.out.println("nearest vertices: " + nearest);
     }
 
-    private void printVisited() {
-        System.out.print("visited = ");
-        for (int i = 0; i < visited.length; i++) {
-            System.out.print(visited[i] + " ");
-        }
-        System.out.println();
-    }
 
     private static void printMatrix(int[][] matrix) {
         for (int r = 0; r < matrix.length; r++) {
